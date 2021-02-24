@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.WebSockets;
+using System.Threading;
+using WebSocketServer.Middleware;
 
 namespace WebSocketServer
 {
@@ -22,22 +24,11 @@ namespace WebSocketServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            //app.UseHttpsRedirection();
+
             app.UseWebSockets();
-
-            app.Use(async (context, next) =>
-            {
-                if (context.WebSockets.IsWebSocketRequest)
-                {
-                    WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    Console.WriteLine("WebSocket connected");
-                }
-                else
-                {
-                    Console.WriteLine("Hello from the 2nd request delegate");
-                    await next();
-                }
-
-            });
+            app.UseWebSocketServer();
 
             app.Run(async context => 
             {
@@ -45,5 +36,19 @@ namespace WebSocketServer
                 await context.Response.WriteAsync("Hello from the 3rd request delegate");
             });
         }
-    }
+
+
+
+        public void WriteRequestParam(HttpContext context)
+        {
+            Console.WriteLine("Request Method: "+ context.Request.Method);
+            Console.WriteLine("Request Method: "+ context.Request.Protocol);
+        
+        if(context.Request.Headers != null){
+            foreach(var h in context.Request.Headers){
+                Console.WriteLine("---> "+h.Key +" : " + h.Value);
+            }
+        }
+        }
+    } 
 }
