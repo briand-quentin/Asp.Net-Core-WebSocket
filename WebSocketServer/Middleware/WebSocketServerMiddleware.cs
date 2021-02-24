@@ -44,7 +44,12 @@ namespace WebSocketServer.Middleware
                         }
                         else if(result.MessageType == WebSocketMessageType.Close)
                         {
-                            Console.WriteLine("Close message");
+                            var id = _manager.GetAllSockets().FirstOrDefault(s => s.Value == webSocket).Key;
+
+                            Console.WriteLine("Receive Close message");
+                            
+                            _manager.GetAllSockets().TryRemove(id,out WebSocket socket);
+                            await socket.CloseAsync(result.CloseStatus.Value,result.CloseStatusDescription,CancellationToken.None);
                             return;
                         }
 
