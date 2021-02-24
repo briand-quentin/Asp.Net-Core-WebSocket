@@ -28,6 +28,7 @@ namespace WebSocketServer.Middleware
                     Console.WriteLine("WebSocket connected");
 
                     var ConnID = _manager.AddSocket(webSocket);
+                    await SendConnIDAsync(webSocket,ConnID);
 
                     await ReceiveMessage(webSocket,async (result,buffer) => 
                     {
@@ -52,7 +53,11 @@ namespace WebSocketServer.Middleware
                 }
         }
 
-
+        private async Task SendConnIDAsync(WebSocket socket,string connID)
+        {
+            var buffer = Encoding.UTF8.GetBytes("ConnID: "+connID);
+            await socket.SendAsync(buffer,WebSocketMessageType.Text,true,CancellationToken.None);
+        } 
         
         private async Task ReceiveMessage(WebSocket socket,Action<WebSocketReceiveResult,byte[]> handleMessage)
         {
